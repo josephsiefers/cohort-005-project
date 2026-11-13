@@ -19,6 +19,13 @@ import {
   LogOut,
   Settings,
 } from "lucide-react";
+// PROTOTYPE (wayfinder #15) — remove with app/components/notifications-prototype/
+import {
+  SidebarHeaderSlot,
+  SidebarNavTopSlot,
+  SidebarNavBadgeSlot,
+  SidebarFooterSlot,
+} from "~/components/notifications-prototype/slots";
 
 interface CurrentUser {
   id: number;
@@ -140,9 +147,11 @@ export function Sidebar({
         <NavLink to="/" className="text-lg font-bold tracking-tight">
           Cadence
         </NavLink>
+        <SidebarHeaderSlot />
       </div>
 
       <nav className="flex-1 space-y-1 p-3">
+        <SidebarNavTopSlot />
         {navItems
           .filter((item) => isVisible(item, currentUserRole))
           .map((item) => (
@@ -160,6 +169,7 @@ export function Sidebar({
             >
               {item.icon}
               {item.label}
+              <SidebarNavBadgeSlot to={item.to} />
             </NavLink>
           ))}
         {isTeamAdmin && (
@@ -242,6 +252,7 @@ export function Sidebar({
                 {currentUser.role}
               </div>
             </div>
+            <SidebarFooterSlot />
             <NavLink
               to="/settings"
               title="Settings"
