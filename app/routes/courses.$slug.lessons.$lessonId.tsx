@@ -21,7 +21,7 @@ import { db } from "~/db";
 import { Button } from "~/components/ui/button";
 import { FullLesson } from "~/components/lesson/full-lesson";
 import { LockedLesson } from "~/components/lesson/locked-lesson";
-import { parseFormData } from "~/lib/validation";
+import { parseFormData, parseParams } from "~/lib/validation";
 
 const createCommentSchema = z.object({
   intent: z.literal("create-comment"),
@@ -44,6 +44,14 @@ const saveNoteSchema = z.object({
       MAX_NOTE_LENGTH,
       `Your note is over ${MAX_NOTE_LENGTH.toLocaleString("en")} characters, so it was not saved.`
     ),
+});
+
+const submitQuizSchema = z.object({
+  quizId: z.coerce.number().int().positive(),
+});
+
+const lessonParamsSchema = z.object({
+  lessonId: z.coerce.number().int().positive(),
 });
 
 const deleteCommentSchema = z.object({
@@ -92,9 +100,10 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   }
 
   const { course, person, enrolled, view, take, manage } = decisions;
+  const { lessonId } = parseParams(params, lessonParamsSchema);
   const page = await lessonViewer.loadPage({
     course,
-    lessonId: Number(params.lessonId),
+    lessonId,
     currentUserId: person?.id ?? null,
     enrolled,
     view,
@@ -126,7 +135,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     ref
   );
   const currentUserId = person.id;
-  const lessonId = Number(params.lessonId);
+  const { lessonId } = parseParams(params, lessonParamsSchema);
 
   if (
     intent === "create-comment" ||
@@ -236,10 +245,11 @@ export async function action({ params, request }: Route.ActionArgs) {
   }
 
   if (intent === "submit-quiz") {
-    const quizId = Number(formData.get("quizId"));
-    if (isNaN(quizId)) {
+    const parsed = parseFormData(formData, submitQuizSchema);
+    if (!parsed.success) {
       throw data("Invalid quiz ID", { status: 400 });
     }
+    const { quizId } = parsed.data;
     if (!lessonViewer.isQuizOnLesson(quizId, lessonId)) {
       throw data("Quiz not found", { status: 404 });
     }

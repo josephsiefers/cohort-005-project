@@ -236,6 +236,8 @@ describe("reading answers from the form", () => {
     form.set("question-13", "41");
     form.set("question-x", "42");
     form.set("question-14", "nope");
+    form.set("question-15", "");
+    form.set("question-", "43");
     expect(course.viewer.quizAnswersFromForm(form)).toEqual({ 12: 40, 13: 41 });
   });
 });

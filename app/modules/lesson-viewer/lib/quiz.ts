@@ -1,5 +1,6 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { quizAttempts, quizOptions, quizQuestions, quizzes } from "~/db/schema";
+import { z } from "zod";
 import type { Db } from "./db";
 
 /** The lesson's quiz, without `isCorrect`, so answers never reach the browser. */
@@ -86,14 +87,18 @@ export function calculateGrade(score: number): string {
   return "F";
 }
 
+const formId = z.coerce.number().int().positive();
+
 /** Form fields named `question-{questionId}`, each holding an option id. */
 export function quizAnswersFromForm(formData: FormData) {
   const answers: Record<number, number> = {};
   for (const [key, value] of formData.entries()) {
     if (!key.startsWith("question-")) continue;
-    const questionId = Number(key.replace("question-", ""));
-    const optionId = Number(value);
-    if (!isNaN(questionId) && !isNaN(optionId)) answers[questionId] = optionId;
+    const questionId = formId.safeParse(key.slice("question-".length));
+    const optionId = formId.safeParse(value);
+    if (questionId.success && optionId.success) {
+      answers[questionId.data] = optionId.data;
+    }
   }
   return answers;
 }
