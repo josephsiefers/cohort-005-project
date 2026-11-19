@@ -19,6 +19,7 @@ describe("noteDraft", () => {
   it("does not save an empty or whitespace-only note", () => {
     expect(noteDraft("", null).canSave).toBe(false);
     expect(noteDraft("   \n ", null).canSave).toBe(false);
+    expect(noteDraft("  ", "saved note").canSave).toBe(false);
   });
 
   it("does not save a note that matches the saved one", () => {
