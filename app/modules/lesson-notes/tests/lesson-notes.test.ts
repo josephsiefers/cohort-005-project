@@ -41,4 +41,14 @@ describe("noteDraft", () => {
     expect(over.tooLong).toBe(true);
     expect(over.canSave).toBe(false);
   });
+
+  it("judges the trimmed text, as the action saves it", () => {
+    expect(noteDraft("same\n", "same").unchanged).toBe(true);
+    expect(noteDraft("same\n", "same").canSave).toBe(false);
+    expect(noteDraft("  hi  ", null).length).toBe(2);
+
+    const paddedAtLimit = noteDraft(` ${"a".repeat(LIMIT)} `, null);
+    expect(paddedAtLimit.tooLong).toBe(false);
+    expect(paddedAtLimit.canSave).toBe(true);
+  });
 });

@@ -12,14 +12,16 @@ export function describeDraft(
   draft: string,
   savedBody: string | null
 ): NoteDraft {
-  const tooLong = draft.length > MAX_NOTE_LENGTH;
-  const empty = draft.trim().length === 0;
-  const unchanged = draft === (savedBody ?? "");
+  // The action trims before it checks the limit and saves, so judge the same
+  // text it will store.
+  const text = draft.trim();
+  const tooLong = text.length > MAX_NOTE_LENGTH;
+  const unchanged = text === (savedBody ?? "");
   return {
-    length: draft.length,
+    length: text.length,
     limit: MAX_NOTE_LENGTH,
     tooLong,
     unchanged,
-    canSave: !tooLong && !empty && !unchanged,
+    canSave: !tooLong && text.length > 0 && !unchanged,
   };
 }
